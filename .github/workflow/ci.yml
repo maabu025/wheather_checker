@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────────────────
+# CropGuard Ghana — GitHub Actions CI Pipeline
+# File: .github/workflows/ci.yml
+#
+# Triggers:
+#   - Push to any branch EXCEPT main
+#   - Pull requests targeting main
+#
+# Jobs:
+#   1. lint-and-test  → Lint with flake8 + run pytest
+#   2. docker-build   → Build Docker image to verify it compiles correctly
+# ─────────────────────────────────────────────────────────────────────────
+
+name: CropGuard CI
+
+on:
+  push:
+    branches-ignore:
+      - main          # Don't run on direct pushes to main (branch protection enforces PRs)
+  pull_request:
+    branches:
+      - main          # Run on all PRs targeting main
+
+jobs:
+
+  # ── Job 1: Lint & Test ─────────────────────────────────────────────────
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python — must match version used in Dockerfile
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"           # Cache pip packages for faster runs
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 pytest pytest-flask
+
+      # Step 4: Lint with flake8
+      # --max-line-length=120: allows slightly longer lines
+      # --ignore=E501,W503: ignore line length and line break warnings
+      - name: Lint with flake8
+        run: |
+          flake8 src/ --max-line-length=120 \
+            --exclude=__pycache__,venv,.venv \
+            --ignore=E501,W503 \
+            --statistics
+
+      # Step 5: Run tests with pytest
+      # Pipeline FAILS here if any test fails
+      - name: Run tests with pytest
+        run: |
+          pytest test_chatbot.py -v --tb=short
+
+  # ── Job 2: Docker Build ────────────────────────────────────────────────
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: lint-and-test        
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build the Docker image — pipeline FAILS if Dockerfile has errors
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: cropguard-ghana:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Smoke test: run the container and verify /health responds
+      - name: Smoke test container
+        run: |
+          docker run -d \
+            --name cropguard_test \
+            -p 5000:5000 \
+            -e FLASK_ENV=production \
+            -e FLASK_SECRET_KEY=ci-test-secret \
+            cropguard-ghana:ci-${{ github.sha }}
+
+          echo "Waiting for container to start..."
+          sleep 8
+
+          curl --fail --silent --show-error http://localhost:5000/health \
+            || (echo "Health check failed!" && docker logs cropguard_test && exit 1)
+
+          echo "Container health check passed"
+          docker stop cropguard_test
