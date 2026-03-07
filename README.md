@@ -1,4 +1,4 @@
-# 🌿 CropGuard Ghana
+#  CropGuard Ghana
 
 > *AI-powered crop disease detection chatbot for Ghanaian farmers*
 
