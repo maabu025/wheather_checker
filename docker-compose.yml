@@ -1,0 +1,65 @@
+# CropGuard Ghana — Docker Compose Configuration
+#
+# Starts the full stack with a single command:
+#   docker-compose up --build
+#
+# Services:
+#   web  — Flask/Gunicorn app (your chatbot)
+#
+# Usage:
+#   docker-compose up --build       → Build image and start
+#   docker-compose up -d            → Run in background (detached)
+#   docker-compose down             → Stop and remove containers
+#   docker-compose logs -f web      → Stream app logs
+#   docker-compose exec web bash    → Open shell inside container
+# ─────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+
+  # ── Flask Web Application ──────────────────────────────────────────────
+  web:
+    build:
+      context: .               # Build from Dockerfile in the root directory
+      dockerfile: Dockerfile
+    container_name: cropguard_web
+    restart: unless-stopped    # Automatically restart if the container crashes
+
+    # Environment variables — reads from .env file (never committed to git)
+    # Falls back to defaults if .env is not present
+    environment:
+      FLASK_ENV: ${FLASK_ENV:-production}
+      PORT: ${PORT:-5000}
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-dev-secret-change-in-prod}
+
+    # Map host port 5000 to container port 5000
+    # Access the app at: http://localhost:5000
+    ports:
+      - "5000:5000"
+
+    # Mount src/ as a volume for local development hot-reloading
+    # Comment this out for a clean production build
+    volumes:
+      - ./src:/app/src
+
+    # Custom bridge network so future services (e.g. a database)
+    # can communicate with the web service by name
+    networks:
+      - cropguard_network
+
+    # Health check at the application level
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+# ── Networks ───────────────────────────────────────────────────────────────
+# Custom bridge network — services communicate by container name, not IP
+networks:
+  cropguard_network:
+    driver: bridge
+    name: cropguard_network
