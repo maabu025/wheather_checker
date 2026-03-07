@@ -188,3 +188,39 @@ CropGuard provides guidance based on a curated knowledge base. For critical crop
 ##  License
 
 MIT License — see [LICENSE](LICENSE) for details.
+
+##  Running with Docker Compose
+
+### Prerequisites
+- [Docker](https://www.docker.com/get-started) installed
+- [Docker Compose](https://docs.docker.com/compose/install/) installed
+
+### Start the app
+```bash
+# Build and start all services
+docker-compose up --build
+
+# App available at:
+http://localhost:5000
+```
+
+### Run in background (detached mode)
+```bash
+docker-compose up -d --build
+```
+
+### Stop the app
+```bash
+docker-compose down
+```
+
+### View logs
+```bash
+docker-compose logs -f web
+```
+
+### Environment Variables
+Copy `.env.example` to `.env` before running:
+```bash
+cp .env.example .env
+```
