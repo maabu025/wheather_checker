@@ -1,0 +1,69 @@
+# CropGuard Ghana — .dockerignore
+# Excludes files from the Docker build context.
+# Smaller context = faster builds and smaller images.
+# ─────────────────────────────────────────────────────────────
+
+# Python cache files (regenerated automatically)
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Virtual environments (dependencies installed fresh inside container)
+venv/
+env/
+ENV/
+.venv/
+virtualenv/
+
+# Environment & Secrets — NEVER bake into Docker image
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Testing & coverage (not needed in production image)
+tests/
+test_*.py
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+junit.xml
+
+# Git metadata
+.git/
+.gitignore
+.gitattributes
+
+# Docker files themselves (no need to copy into image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDE & editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Terraform (not needed in app container)
+.terraform/
+*.tfstate
+
