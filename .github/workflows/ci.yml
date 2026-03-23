@@ -1,25 +1,12 @@
-# ─────────────────────────────────────────────────────────────────────────
-# CropGuard Ghana — GitHub Actions CI Pipeline
-# File: .github/workflows/ci.yml
-#
-# Triggers:
-#   - Push to any branch EXCEPT main
-#   - Pull requests targeting main
-#
-# Jobs:
-#   1. lint-and-test  → Lint with flake8 + run pytest
-#   2. docker-build   → Build Docker image to verify it compiles correctly
-# ─────────────────────────────────────────────────────────────────────────
-
 name: CropGuard CI
 
 on:
   push:
     branches-ignore:
-      - main          # Don't run on direct pushes to main (branch protection enforces PRs)
+      - main
   pull_request:
     branches:
-      - main          # Run on all PRs targeting main
+      - main
 
 jobs:
 
@@ -33,12 +20,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python — must match version used in Dockerfile
+      # Step 2: Set up Python
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"           # Cache pip packages for faster runs
+          cache: "pip"
 
       # Step 3: Install dependencies
       - name: Install dependencies
@@ -47,18 +34,15 @@ jobs:
           pip install -r requirements.txt
           pip install flake8 pytest pytest-flask
 
-      # Step 4: Lint with flake8
-      # --max-line-length=120: allows slightly longer lines
-      # --ignore=E501,W503: ignore line length and line break warnings
-     - name: Lint with flake8
-  run: |
-    flake8 src/ --max-line-length=120 \
-      --exclude=__pycache__,venv,.venv \
-      --ignore=E501,W503,F401,W292 \
-      --statistics
+      # Step 4: Lint with flake8 
+      - name: Lint with flake8
+        run: |
+          flake8 src/ --max-line-length=120 \
+            --exclude=__pycache__,venv,.venv \
+            --ignore=E501,W503,F401,W292 \
+            --statistics
 
       # Step 5: Run tests with pytest
-      # Pipeline FAILS here if any test fails
       - name: Run tests with pytest
         run: |
           pytest test_chatbot.py -v --tb=short
@@ -76,7 +60,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build the Docker image — pipeline FAILS if Dockerfile has errors
+      # Build Docker image
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
@@ -87,7 +71,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Smoke test: run the container and verify /health responds
+      # Smoke test container
       - name: Smoke test container
         run: |
           docker run -d \
