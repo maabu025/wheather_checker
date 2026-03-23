@@ -16,25 +16,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install flake8 pytest pytest-flask
 
-      # Step 4: Lint with flake8 
       - name: Lint with flake8
         run: |
           flake8 src/ --max-line-length=120 \
@@ -42,7 +38,6 @@ jobs:
             --ignore=E501,W503,F401,W292 \
             --statistics
 
-      # Step 5: Run tests with pytest
       - name: Run tests with pytest
         run: |
           pytest test_chatbot.py -v --tb=short
@@ -60,18 +55,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build Docker image
+      # ✅ FIXED INDENTATION HERE
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: false
+          load: true
           tags: cropguard-ghana:ci-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Smoke test container
       - name: Smoke test container
         run: |
           docker run -d \
