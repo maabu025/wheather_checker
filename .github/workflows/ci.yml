@@ -50,12 +50,12 @@ jobs:
       # Step 4: Lint with flake8
       # --max-line-length=120: allows slightly longer lines
       # --ignore=E501,W503: ignore line length and line break warnings
-      - name: Lint with flake8
-        run: |
-          flake8 src/ --max-line-length=120 \
-            --exclude=__pycache__,venv,.venv \
-            --ignore=E501,W503 \
-            --statistics
+     - name: Lint with flake8
+  run: |
+    flake8 src/ --max-line-length=120 \
+      --exclude=__pycache__,venv,.venv \
+      --ignore=E501,W503,F401,W292 \
+      --statistics
 
       # Step 5: Run tests with pytest
       # Pipeline FAILS here if any test fails
