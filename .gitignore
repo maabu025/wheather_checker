@@ -151,3 +151,7 @@ $RECYCLE.BIN/
 staticfiles/
 media/
 uploads/
+terraform/terraform.tfvars
+terraform/.terraform/
+bastion_key
+bastion_key.pub
