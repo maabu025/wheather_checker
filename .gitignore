@@ -155,3 +155,8 @@ terraform/terraform.tfvars
 terraform/.terraform/
 bastion_key
 bastion_key.pub
+bastion_key
+bastion_key.pub
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
