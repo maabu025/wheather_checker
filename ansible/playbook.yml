@@ -82,8 +82,8 @@
 
     - name: Deploy application with docker compose
       shell: |
-        export IMAGE={{ acr_server }}/cropguard-ghana:{{ image_tag }}
         docker compose -f {{ app_dir }}/docker-compose.yml up -d --pull always
       environment:
-        IMAGE: "{{ acr_server }}/cropguard-ghana:{{ image_tag }}"
-        
+        ACR_SERVER: "{{ acr_server }}"
+        IMAGE_TAG: "{{ image_tag }}"
+        FLASK_SECRET_KEY: "{{ lookup('env', 'FLASK_SECRET_KEY') }}"
