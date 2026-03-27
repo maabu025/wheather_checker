@@ -67,7 +67,7 @@ jobs:
         run: |
           cat > ansible/inventory.ini << INVENTORY
           [app_vm]
-          ${{ secrets.APP_VM_PRIVATE_IP }} ansible_user=azureuser ansible_password=${{ secrets.VM_ADMIN_PASSWORD }} ansible_ssh_common_args='-o ProxyJump=azureuser@${{ secrets.BASTION_PUBLIC_IP }} -o StrictHostKeyChecking=no'
+          ${{ secrets.APP_VM_PUBLIC_IP }} ansible_user=azureuser ansible_password=${{ secrets.VM_ADMIN_PASSWORD }} ansible_ssh_common_args='-o StrictHostKeyChecking=no'
           INVENTORY
 
       - name: Run Ansible playbook
