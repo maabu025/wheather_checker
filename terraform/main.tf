@@ -54,6 +54,7 @@ resource "azurerm_network_security_group" "bastion" {
     destination_address_prefix = "*"
   }
 }
+
 resource "azurerm_network_security_group" "app" {
   name                = "app-nsg"
   location            = azurerm_resource_group.main.location
@@ -61,7 +62,7 @@ resource "azurerm_network_security_group" "app" {
 
   security_rule {
     name                       = "allow-ssh-public"
-    priority                   = 90
+    priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -73,7 +74,7 @@ resource "azurerm_network_security_group" "app" {
 
   security_rule {
     name                       = "allow-ssh-from-bastion"
-    priority                   = 100
+    priority                   = 105
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
