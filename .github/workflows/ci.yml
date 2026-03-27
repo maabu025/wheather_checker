@@ -38,7 +38,7 @@ jobs:
       --ignore=E501,W503,F401,W292 \
       --statistics
 
- -  name: Run tests with pytest
+   - name: Run tests with pytest
   run: |
     PYTHONPATH=src pytest test_chatbot.py -v --tb=short
   # ── Job 2: Docker Build ────────────────────────────────────────────────
