@@ -32,16 +32,15 @@ jobs:
           pip install flake8 pytest pytest-flask
 
       - name: Lint with flake8
-        run: |
-          flake8 src/ --max-line-length=120 \
-            --exclude=__pycache__,venv,.venv \
-            --ignore=E501,W503,F401,W292 \
-            --statistics
+  run: |
+    flake8 src/ --max-line-length=120 \
+      --exclude=__pycache__,venv,.venv \
+      --ignore=E501,W503,F401,W292 \
+      --statistics
 
-      - name: Run tests with pytest
-        run: |
-          pytest test_chatbot.py -v --tb=short
-
+ -  name: Run tests with pytest
+  run: |
+    PYTHONPATH=src pytest test_chatbot.py -v --tb=short
   # ── Job 2: Docker Build ────────────────────────────────────────────────
   docker-build:
     name: Docker Build
