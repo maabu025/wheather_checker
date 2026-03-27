@@ -54,11 +54,22 @@ resource "azurerm_network_security_group" "bastion" {
     destination_address_prefix = "*"
   }
 }
-
 resource "azurerm_network_security_group" "app" {
   name                = "app-nsg"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
+
+  security_rule {
+    name                       = "allow-ssh-public"
+    priority                   = 90
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 
   security_rule {
     name                       = "allow-ssh-from-bastion"
@@ -144,11 +155,12 @@ resource "azurerm_network_interface" "app" {
 
   ip_configuration {
     name                          = "app-ipconfig"
-    subnet_id                     = azurerm_subnet.private.id
+    subnet_id                     = azurerm_subnet.public.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.app.id
   }
 
-  depends_on = [azurerm_subnet.private]
+  depends_on = [azurerm_subnet.public]
 }
 
 resource "azurerm_network_interface_security_group_association" "app" {
@@ -215,4 +227,12 @@ resource "azurerm_mysql_flexible_database" "main" {
   server_name         = azurerm_mysql_flexible_server.main.name
   charset             = "utf8mb4"
   collation           = "utf8mb4_unicode_ci"
+}
+
+resource "azurerm_public_ip" "app" {
+  name                = "app-pip"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
